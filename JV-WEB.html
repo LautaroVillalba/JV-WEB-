@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Ventas & Clientes</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f5ff',
+              100: '#e0ebff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              500: '#8b5cf6',
+              600: '#7c3aed',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(71, 85, 105, 1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 glass-card border-b border-slate-800/80 px-4 lg:px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+        <i class="fa-solid fa-[#000] fa-chart-line text-white text-lg"></i>
+      </div>
+      <div>
+        <h1 class="font-extrabold text-lg text-white tracking-tight flex items-center gap-2">
+          ControlVentas <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">PRO</span>
+        </h1>
+        <p class="text-xs text-slate-400">Gestión Comercial & Pagos</p>
+      </div>
+    </div>
+
+    <!-- QUICK STATS SUMMARY -->
+    <div class="hidden md:flex items-center gap-6">
+      <div class="text-right">
+        <span class="text-xs text-slate-400 block">Ventas de Hoy</span>
+        <span id="headerTodayTotal" class="text-base font-bold text-emerald-400">$0.00</span>
+      </div>
+      <div class="h-8 w-px bg-slate-800"></div>
+      <div class="text-right">
+        <span class="text-xs text-slate-400 block">Pendiente Cobro</span>
+        <span id="headerPendingTotal" class="text-base font-bold text-amber-400">$0.00</span>
+      </div>
+    </div>
+
+    <!-- KEYBOARD HINTS BUTTON -->
+    <button onclick="toggleShortcutsModal()" class="text-slate-400 hover:text-white transition bg-slate-800/60 hover:bg-slate-800 p-2.5 rounded-xl border border-slate-700/50 flex items-center gap-2 text-xs font-medium">
+      <i class="fa-solid fa-keyboard text-brand-400"></i>
+      <span class="hidden sm:inline">Atajos</span>
+    </button>
+  </header>
+
+  <!-- MAIN NAVIGATION TABS -->
+  <div class="bg-slate-900/90 border-b border-slate-800 px-4 lg:px-8 py-2 sticky top-[61px] z-30 backdrop-blur-md">
+    <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar max-w-7xl mx-auto">
+      <button id="tabBtn-dashboard" onclick="switchTab('dashboard')" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap bg-brand-600 text-white shadow-lg shadow-brand-600/30">
+        <i class="fa-solid fa-chart-pie"></i> Panel Principal
+      </button>
+      <button id="tabBtn-sales" onclick="switchTab('sales')" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <i class="fa-solid fa-plus-circle"></i> Registrar Venta
+      </button>
+      <button id="tabBtn-clients" onclick="switchTab('clients')" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <i class="fa-solid fa-users"></i> Clientes & Historial
+      </button>
+      <button id="tabBtn-pending" onclick="switchTab('pending')" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60">
+        <i class="fa-solid fa-clock-rotate-left"></i> Cuentas Pendientes
+        <span id="pendingBadge" class="hidden px-2 py-0.5 text-xs bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl w-full mx-auto p-4 lg:p-8 flex-grow">
+
+    <!-- VIEW: DASHBOARD -->
+    <section id="view-dashboard" class="view-content space-y-6">
+      
+      <!-- CARDS SUMMARY GRID -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- CARD 1 -->
+        <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Ventas Semana</p>
+              <h3 id="dashWeeklyTotal" class="text-2xl font-extrabold text-white mt-1">$0.00</h3>
+            </div>
+            <div class="p-3 bg-brand-500/10 text-brand-400 rounded-xl border border-brand-500/20">
+              <i class="fa-solid fa-calendar-week text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center text-xs text-slate-400">
+            <span>Últimos 7 días activos</span>
+          </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ventas Cobradas</p>
+              <h3 id="dashPaidTotal" class="text-2xl font-extrabold text-emerald-400 mt-1">$0.00</h3>
+            </div>
+            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+              <i class="fa-solid fa-circle-check text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center text-xs text-slate-400">
+            <span>Ingreso efectivo liquidado</span>
+          </div>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Pagos Faltantes</p>
+              <h3 id="dashPendingTotal" class="text-2xl font-extrabold text-amber-400 mt-1">$0.00</h3>
+            </div>
+            <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+              <i class="fa-solid fa-hand-holding-dollar text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center text-xs text-slate-400">
+            <span>Saldo pendiente por cobrar</span>
+          </div>
+        </div>
+
+        <!-- CARD 4 -->
+        <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Clientes Registrados</p>
+              <h3 id="dashClientsCount" class="text-2xl font-extrabold text-accent-500 mt-1">0</h3>
+            </div>
+            <div class="p-3 bg-accent-500/10 text-accent-500 rounded-xl border border-accent-500/20">
+              <i class="fa-solid fa-users text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center text-xs text-slate-400">
+            <span>Base total de clientes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHART & RECENT SALES GRID -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- WEEKLY CHART -->
+        <div class="glass-card p-6 rounded-2xl lg:col-span-2 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-chart-simple text-brand-400"></i> Estadísticas Semanales (7 días)
+              </h2>
+              <p class="text-xs text-slate-400">Ventas registradas agrupadas por día de la semana actual</p>
+            </div>
+            <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">En tiempo real</span>
+          </div>
+          <div class="relative w-full h-[300px]">
+            <canvas id="salesChart"></canvas>
+          </div>
+        </div>
+
+        <!-- RECENT ACTIVITY MINI LIST -->
+        <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-amber-400"></i> Últimas Ventas
+              </h2>
+              <button onclick="switchTab('clients')" class="text-xs text-brand-400 hover:text-brand-300 transition">Ver todas</button>
+            </div>
+            <div id="recentSalesList" class="space-y-3 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+          <button onclick="switchTab('sales')" class="mt-4 w-full py-2.5 bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 font-semibold rounded-xl border border-brand-500/30 text-xs transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-plus"></i> Registrar Nueva Venta
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW: NEW SALE FORM -->
+    <section id="view-sales" class="view-content hidden">
+      <div class="max-w-2xl mx-auto">
+        <div class="glass-card p-6 lg:p-8 rounded-2xl relative shadow-2xl">
+          <div class="flex items-center gap-3 pb-6 mb-6 border-b border-slate-800">
+            <div class="p-3 bg-brand-600 text-white rounded-xl shadow-lg shadow-brand-600/30">
+              <i class="fa-solid fa-cart-plus text-xl"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white">Registrar Nueva Venta</h2>
+              <p class="text-xs text-slate-400">Completa los campos. Presiona <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300 text-[10px]">ENTER</kbd> para guardar rápidamente.</p>
+            </div>
+          </div>
+
+          <form id="saleForm" onsubmit="handleSaveSale(event)" class="space-y-5">
+            <!-- CLIENT SELECT / INPUT -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Cliente *</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <select id="saleClientSelect" onchange="handleClientSelectChange(this)" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                  <!-- Dynamic Options -->
+                </select>
+                <input type="text" id="saleNewClientInput" placeholder="Nombre de cliente nuevo" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+              </div>
+            </div>
+
+            <!-- AMOUNT & DATE GRID -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- AMOUNT -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Monto Total ($) *</label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                  <input type="number" step="0.01" inputmode="decimal" id="saleAmount" required placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-4 py-3 text-lg font-extrabold text-white placeholder-slate-600 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                </div>
+                <span class="text-[11px] text-brand-400 mt-1 block"><i class="fa-solid fa-mobile-screen"></i> Despliega teclado numérico en móvil</span>
+              </div>
+
+              <!-- DATE PICKER -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Fecha de la Venta *</label>
+                <input type="date" id="saleDate" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+              </div>
+            </div>
+
+            <!-- CONCEPT / DESCRIPTION -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Detalle o Concepto</label>
+              <input type="text" id="saleConcept" placeholder="Ej: 2 Remeras, Reparación, Producto X..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+            </div>
+
+            <!-- PAYMENT STATUS -->
+            <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 space-y-3">
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Estado del Pago</label>
+              <div class="grid grid-cols-2 gap-3">
+                <label class="flex items-center gap-3 p-3 bg-slate-800/80 border border-slate-700 rounded-xl cursor-pointer hover:border-slate-600 transition">
+                  <input type="radio" name="paymentStatus" value="paid" checked onchange="togglePendingAmountInput(false)" class="text-brand-500 focus:ring-brand-500 h-4 w-4">
+                  <div>
+                    <span class="block text-sm font-semibold text-emerald-400">Pagado Total</span>
+                    <span class="block text-[10px] text-slate-400">Sin saldo pendiente</span>
+                  </div>
+                </label>
+                <label class="flex items-center gap-3 p-3 bg-slate-800/80 border border-slate-700 rounded-xl cursor-pointer hover:border-slate-600 transition">
+                  <input type="radio" name="paymentStatus" value="pending" onchange="togglePendingAmountInput(true)" class="text-brand-500 focus:ring-brand-500 h-4 w-4">
+                  <div>
+                    <span class="block text-sm font-semibold text-amber-400">Pago Faltante</span>
+                    <span class="block text-[10px] text-slate-400">Queda saldo a deber</span>
+                  </div>
+                </label>
+              </div>
+
+              <!-- PENDING AMOUNT BOX -->
+              <div id="pendingAmountBox" class="hidden pt-2 border-t border-slate-800">
+                <label class="block text-xs font-medium text-amber-300 mb-1">Monto Faltante / Restante ($)</label>
+                <input type="number" step="0.01" inputmode="decimal" id="salePendingAmount" placeholder="¿Cuánto queda debiendo?" class="w-full bg-slate-950 border border-amber-500/30 rounded-xl px-4 py-2.5 text-sm text-amber-300 placeholder-slate-600 focus:outline-none focus:border-amber-500 transition">
+              </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="pt-4 flex items-center justify-end gap-3">
+              <button type="button" onclick="switchTab('dashboard')" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition">
+                Cancelar <span class="text-xs text-slate-500">(Esc)</span>
+              </button>
+              <button type="submit" class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-lg shadow-brand-600/30 transition flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar Venta <span class="text-xs opacity-75">(Enter)</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: CLIENTS & SALES HISTORY -->
+    <section id="view-clients" class="view-content hidden space-y-6">
+      
+      <!-- HEADER & CONTROLS -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-users text-brand-400"></i> Gestión de Clientes & Ventas
+          </h2>
+          <p class="text-xs text-slate-400">Filtra por cliente, revisa detalles e historial de cada transacción.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- SEARCH CLIENT -->
+          <div class="relative min-w-[220px]">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            <input type="text" id="clientSearchInput" onkeyup="filterClientsList()" placeholder="Buscar cliente..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-brand-500 transition">
+          </div>
+
+          <!-- ADD CLIENT MODAL TRIGGER -->
+          <button onclick="openNewClientModal()" class="px-4 py-2 bg-brand-600/20 hover:bg-brand-600/30 border border-brand-500/30 text-brand-300 rounded-xl text-xs font-bold transition flex items-center gap-2">
+            <i class="fa-solid fa-user-plus"></i> Crear Cliente
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN CLIENTS GRID WITH SALES DETAILS -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- CLIENTS LIST (LEFT) -->
+        <div class="glass-card p-4 rounded-2xl space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Clientes (<span id="clientsListCount">0</span>)</span>
+            <span class="text-[10px] text-slate-500">Selecciona para ver ventas</span>
+          </div>
+
+          <div id="clientsList" class="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- CLIENT DETAILED SALES PANEL (RIGHT) -->
+        <div class="glass-card p-6 rounded-2xl lg:col-span-2 flex flex-col justify-between">
+          <div id="clientDetailContainer" class="space-y-4">
+            <!-- Default Placeholder when no client is selected -->
+            <div id="noClientSelected" class="py-20 text-center text-slate-500">
+              <i class="fa-solid fa-user-gear text-4xl mb-3 text-slate-600"></i>
+              <p class="text-sm font-medium">Selecciona un cliente de la lista para inspeccionar sus ventas registradas.</p>
+            </div>
+
+            <!-- Active Selected Client Details (Hidden by default) -->
+            <div id="activeClientContent" class="hidden space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-2">
+                <div>
+                  <h3 id="selectedClientName" class="text-xl font-bold text-white flex items-center gap-2">
+                    <!-- Client Name -->
+                  </h3>
+                  <p id="selectedClientSub" class="text-xs text-slate-400">Historial completo de compras y pagos</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span id="selectedClientDebtBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    Al día
+                  </span>
+                  <button onclick="deleteCurrentClient()" class="p-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition text-xs" title="Eliminar Cliente">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- SALES TABLE FOR CLIENT -->
+              <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                      <th class="py-3 px-2">Fecha</th>
+                      <th class="py-3 px-2">Detalle</th>
+                      <th class="py-3 px-2">Monto</th>
+                      <th class="py-3 px-2">Estado</th>
+                      <th class="py-3 px-2 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="clientSalesTableBody" class="divide-y divide-slate-800/60 text-xs">
+                    <!-- Dynamic Sales Rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW: PENDING PAYMENTS -->
+    <section id="view-pending" class="view-content hidden space-y-6">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-amber-400"></i> Control de Pagos Faltantes
+        </h2>
+        <p class="text-xs text-slate-400">Listado de todas las ventas con saldo deudor pendiente por cobrar.</p>
+      </div>
+
+      <div id="pendingSalesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Dynamic Pending Cards -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: EDIT SALE -->
+  <div id="editSaleModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="glass-card w-full max-w-lg p-6 rounded-2xl shadow-2xl relative border border-slate-700/80">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-brand-400"></i> Editar Registro de Venta
+        </h3>
+        <button onclick="closeEditSaleModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="editSaleForm" onsubmit="handleUpdateSale(event)" class="space-y-4 mt-4">
+        <input type="hidden" id="editSaleId">
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Monto Total ($)</label>
+          <input type="number" step="0.01" inputmode="decimal" id="editSaleAmount" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Fecha de Venta</label>
+          <input type="date" id="editSaleDate" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Detalle / Concepto</label>
+          <input type="text" id="editSaleConcept" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-slate-800">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Estado de Pago</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center gap-2 p-2.5 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer">
+              <input type="radio" name="editPaymentStatus" value="paid" onchange="toggleEditPendingBox(false)">
+              <span class="text-xs font-medium text-emerald-400">Pagado</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer">
+              <input type="radio" name="editPaymentStatus" value="pending" onchange="toggleEditPendingBox(true)">
+              <span class="text-xs font-medium text-amber-400">Pago Faltante</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="editPendingBox" class="hidden">
+          <label class="block text-xs font-medium text-amber-300 mb-1">Saldo Faltante ($)</label>
+          <input type="number" step="0.01" inputmode="decimal" id="editSalePendingAmount" class="w-full bg-slate-900 border border-amber-500/30 rounded-xl px-4 py-2 text-sm text-amber-300">
+        </div>
+
+        <div class="pt-4 flex justify-end gap-3 border-t border-slate-800">
+          <button type="button" onclick="closeEditSaleModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Cancelar (Esc)</button>
+          <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold">Guardar Cambios (Enter)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD CLIENT -->
+  <div id="newClientModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="glass-card w-full max-w-md p-6 rounded-2xl shadow-2xl relative border border-slate-700/80">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-brand-400"></i> Registrar Nuevo Cliente
+        </h3>
+        <button onclick="closeNewClientModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="newClientForm" onsubmit="handleCreateClient(event)" class="space-y-4 mt-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Nombre Completo *</label>
+          <input type="text" id="newClientNameModal" required placeholder="Ej: Maria Perez" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Teléfono / WhatsApp</label>
+          <input type="text" id="newClientPhoneModal" placeholder="Ej: +54 9 351..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="pt-4 flex justify-end gap-3 border-t border-slate-800">
+          <button type="button" onclick="closeNewClientModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Cancelar (Esc)</button>
+          <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold">Crear Cliente (Enter)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: KEYBOARD SHORTCUTS HINT -->
+  <div id="shortcutsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="glass-card w-full max-w-sm p-6 rounded-2xl shadow-2xl relative border border-slate-700/80">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-keyboard text-brand-400"></i> Atajos de Teclado
+        </h3>
+        <button onclick="toggleShortcutsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 py-4 text-xs text-slate-300">
+        <div class="flex items-center justify-between p-2 bg-slate-900/80 rounded-lg">
+          <span>Guardar formulario / Confirmar</span>
+          <kbd class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-brand-400 font-bold">ENTER</kbd>
+        </div>
+        <div class="flex items-center justify-between p-2 bg-slate-900/80 rounded-lg">
+          <span>Cerrar pestañas / Salir de modales</span>
+          <kbd class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-amber-400 font-bold">ESC</kbd>
+        </div>
+        <div class="flex items-center justify-between p-2 bg-slate-900/80 rounded-lg">
+          <span>Apertura teclado numérico (Móvil)</span>
+          <span class="text-slate-400">Automático en campos de monto</span>
+        </div>
+      </div>
+      <button onclick="toggleShortcutsModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold">Entendido</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500">
+    <p>© Control de Ventas & Negocio - Sistema Web Inteligente</p>
+  </footer>
+
+  <!-- MAIN SCRIPT LOGIC -->
+  <script>
+    // INITIAL APP STATE
+    let state = {
+      clients: [
+        { id: 'c1', name: 'Juan Gómez', phone: '+54 9 351 1234567' },
+        { id: 'c2', name: 'Laura Martinez', phone: '+54 9 351 9876543' },
+        { id: 'c3', name: 'Carlos López', phone: '+54 9 351 5554433' }
+      ],
+      sales: [
+        { id: 's1', clientId: 'c1', amount: 15000, date: getFormattedDate(0), concept: 'Mantenimiento General', status: 'paid', pendingAmount: 0 },
+        { id: 's2', clientId: 'c2', amount: 28000, date: getFormattedDate(-1), concept: 'Pedido Especial x3', status: 'pending', pendingAmount: 8000 },
+        { id: 's3', clientId: 'c3', amount: 12500, date: getFormattedDate(-2), concept: 'Accesorios Varios', status: 'paid', pendingAmount: 0 },
+        { id: 's4', clientId: 'c1', amount: 9500, date: getFormattedDate(-4), concept: 'Repuesto Original', status: 'pending', pendingAmount: 3500 }
+      ],
+      activeTab: 'dashboard',
+      selectedClientId: null
+    };
+
+    let salesChartInstance = null;
+
+    // LOCAL STORAGE LOAD/SAVE
+    function loadStorage() {
+      const savedClients = localStorage.getItem('cv_clients');
+      const savedSales = localStorage.getItem('cv_sales');
+      if (savedClients) state.clients = JSON.parse(savedClients);
+      if (savedSales) state.sales = JSON.parse(savedSales);
+    }
+
+    function saveStorage() {
+      localStorage.setItem('cv_clients', JSON.stringify(state.clients));
+      localStorage.setItem('cv_sales', JSON.stringify(state.sales));
+    }
+
+    // HELPER: GET FORMATTED DATE (YYYY-MM-DD) WITH OFFSET
+    function getFormattedDate(offsetDays = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      return d.toISOString().split('T')[0];
+    }
+
+    // HELPER: FORMAT CURRENCY
+    function formatMoney(amount) {
+      return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(amount || 0);
+    }
+
+    // INIT METHOD
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStorage();
+      document.getElementById('saleDate').value = getFormattedDate(0);
+      setupGlobalKeyboardListeners();
+      renderAllViews();
+    });
+
+    // GLOBAL KEYBOARD LISTENER (ESC & ENTER HANDLING)
+    function setupGlobalKeyboardListeners() {
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          // Check Modals first
+          if (!document.getElementById('editSaleModal').classList.contains('hidden')) {
+            closeEditSaleModal();
+            return;
+          }
+          if (!document.getElementById('newClientModal').classList.contains('hidden')) {
+            closeNewClientModal();
+            return;
+          }
+          if (!document.getElementById('shortcutsModal').classList.contains('hidden')) {
+            toggleShortcutsModal();
+            return;
+          }
+          // If in tabs other than dashboard, return to dashboard
+          if (state.activeTab !== 'dashboard') {
+            switchTab('dashboard');
+          }
+        }
+      });
+    }
+
+    // TAB SWITCHING LOGIC
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      
+      // Update Tab UI
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = 'tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60';
+      });
+
+      const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.className = 'tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap bg-brand-600 text-white shadow-lg shadow-brand-600/30';
+      }
+
+      // Hide all content views
+      document.querySelectorAll('.view-content').forEach(view => view.classList.add('hidden'));
+
+      // Show requested view
+      const targetView = document.getElementById(`view-${tabId}`);
+      if (targetView) targetView.classList.remove('hidden');
+
+      // Refresh specific tab logic
+      if (tabId === 'sales') {
+        populateClientSelectOptions();
+        setTimeout(() => document.getElementById('saleAmount').focus(), 100);
+      } else if (tabId === 'dashboard') {
+        renderChart();
+      } else if (tabId === 'pending') {
+        renderPendingSales();
+      } else if (tabId === 'clients') {
+        renderClientsList();
+      }
+
+      renderSummaryMetrics();
+    }
+
+    // RENDER ALL VIEWS
+    function renderAllViews() {
+      renderSummaryMetrics();
+      renderChart();
+      renderRecentSales();
+      populateClientSelectOptions();
+      renderClientsList();
+      renderPendingSales();
+    }
+
+    // RENDER METRICS SUMMARY
+    function renderSummaryMetrics() {
+      const todayStr = getFormattedDate(0);
+      
+      const todayTotal = state.sales
+        .filter(s => s.date === todayStr)
+        .reduce((sum, s) => sum + Number(s.amount), 0);
+
+      const pendingTotal = state.sales
+        .filter(s => s.status === 'pending')
+        .reduce((sum, s) => sum + Number(s.pendingAmount || 0), 0);
+
+      const paidTotal = state.sales
+        .reduce((sum, s) => sum + (Number(s.amount) - Number(s.pendingAmount || 0)), 0);
+
+      const weeklyTotal = state.sales
+        .reduce((sum, s) => sum + Number(s.amount), 0);
+
+      document.getElementById('headerTodayTotal').textContent = formatMoney(todayTotal);
+      document.getElementById('headerPendingTotal').textContent = formatMoney(pendingTotal);
+
+      document.getElementById('dashWeeklyTotal').textContent = formatMoney(weeklyTotal);
+      document.getElementById('dashPaidTotal').textContent = formatMoney(paidTotal);
+      document.getElementById('dashPendingTotal').textContent = formatMoney(pendingTotal);
+      document.getElementById('dashClientsCount').textContent = state.clients.length;
+
+      // Pending badge update
+      const pendingCount = state.sales.filter(s => s.status === 'pending').length;
+      const badge = document.getElementById('pendingBadge');
+      if (pendingCount > 0) {
+        badge.textContent = pendingCount;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    // RENDER CHART (7 DAYS SALES)
+    function renderChart() {
+      const ctx = document.getElementById('salesChart');
+      if (!ctx) return;
+
+      // Calculate last 7 days sales
+      const daysLabels = [];
+      const salesData = [];
+      
+      const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const dayLabel = `${dayNames[d.getDay()]} ${d.getDate()}`;
+        
+        const totalDay = state.sales
+          .filter(s => s.date === dateStr)
+          .reduce((sum, s) => sum + Number(s.amount), 0);
+
+        daysLabels.push(dayLabel);
+        salesData.push(totalDay);
+      }
+
+      if (salesChartInstance) {
+        salesChartInstance.destroy();
+      }
+
+      salesChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: daysLabels,
+          datasets: [{
+            label: 'Ventas Total ($)',
+            data: salesData,
+            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+            borderColor: '#3b82f6',
+            borderWidth: 2,
+            borderRadius: 8,
+            hoverBackgroundColor: 'rgba(139, 92, 246, 0.8)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'Vendido: ' + formatMoney(context.raw);
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8', font: { size: 11 } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8', font: { size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    // RENDER RECENT SALES MINI LIST
+    function renderRecentSales() {
+      const container = document.getElementById('recentSalesList');
+      if (!container) return;
+
+      const sortedSales = [...state.sales].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+      if (sortedSales.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 py-4 text-center">Sin ventas registradas aún.</p>`;
+        return;
+      }
+
+      container.innerHTML = sortedSales.map(sale => {
+        const client = state.clients.find(c => c.id === sale.clientId);
+        const clientName = client ? client.name : 'Cliente Eliminado';
+        const isPaid = sale.status === 'paid';
+
+        return `
+          <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800/80">
+            <div>
+              <p class="text-xs font-bold text-white">${clientName}</p>
+              <p class="text-[10px] text-slate-400">${sale.date} • ${sale.concept || 'Sin detalle'}</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-extrabold block ${isPaid ? 'text-emerald-400' : 'text-amber-400'}">${formatMoney(sale.amount)}</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded ${isPaid ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">
+                ${isPaid ? 'Pagado' : 'Falta: ' + formatMoney(sale.pendingAmount)}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // POPULATE CLIENT SELECT IN FORM
+    function populateClientSelectOptions() {
+      const select = document.getElementById('saleClientSelect');
+      if (!select) return;
+
+      let html = `<option value="">-- Selecciona Cliente --</option>`;
+      state.clients.forEach(c => {
+        html += `<option value="${c.id}">${c.name}</option>`;
+      });
+      html += `<option value="NEW_CLIENT">+ Crear Nuevo Cliente</option>`;
+      select.innerHTML = html;
+      handleClientSelectChange(select);
+    }
+
+    function handleClientSelectChange(select) {
+      const newClientInput = document.getElementById('saleNewClientInput');
+      if (select.value === 'NEW_CLIENT') {
+        newClientInput.classList.remove('hidden');
+        newClientInput.required = true;
+        newClientInput.focus();
+      } else {
+        newClientInput.classList.add('hidden');
+        newClientInput.required = false;
+        newClientInput.value = '';
+      }
+    }
+
+    function togglePendingAmountInput(show) {
+      const box = document.getElementById('pendingAmountBox');
+      const input = document.getElementById('salePendingAmount');
+      if (show) {
+        box.classList.remove('hidden');
+        input.required = true;
+      } else {
+        box.classList.add('hidden');
+        input.required = false;
+        input.value = '';
+      }
+    }
+
+    // HANDLE SAVE SALE FORM
+    function handleSaveSale(e) {
+      e.preventDefault();
+
+      let clientId = document.getElementById('saleClientSelect').value;
+      const newClientName = document.getElementById('saleNewClientInput').value.trim();
+
+      if (clientId === 'NEW_CLIENT') {
+        if (!newClientName) return;
+        const newClient = {
+          id: 'c_' + Date.now(),
+          name: newClientName,
+          phone: ''
+        };
+        state.clients.push(newClient);
+        clientId = newClient.id;
+      }
+
+      if (!clientId) {
+        alert('Por favor selecciona o crea un cliente.');
+        return;
+      }
+
+      const amount = parseFloat(document.getElementById('saleAmount').value) || 0;
+      const date = document.getElementById('saleDate').value;
+      const concept = document.getElementById('saleConcept').value.trim();
+      const paymentStatus = document.querySelector('input[name="paymentStatus"]:checked').value;
+      const pendingAmount = paymentStatus === 'pending' ? parseFloat(document.getElementById('salePendingAmount').value) || 0 : 0;
+
+      const newSale = {
+        id: 's_' + Date.now(),
+        clientId,
+        amount,
+        date,
+        concept,
+        status: paymentStatus,
+        pendingAmount
+      };
+
+      state.sales.unshift(newSale);
+      saveStorage();
+
+      // Reset Form
+      document.getElementById('saleForm').reset();
+      document.getElementById('saleDate').value = getFormattedDate(0);
+      togglePendingAmountInput(false);
+
+      // Notification & redirect
+      alert('¡Venta registrada con éxito!');
+      switchTab('dashboard');
+    }
+
+    // RENDER CLIENTS LIST & SELECTION
+    function renderClientsList() {
+      const container = document.getElementById('clientsList');
+      const countLabel = document.getElementById('clientsListCount');
+      if (!container) return;
+
+      countLabel.textContent = state.clients.length;
+
+      if (state.clients.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 py-4 text-center">No hay clientes registrados.</p>`;
+        return;
+      }
+
+      container.innerHTML = state.clients.map(c => {
+        // Calculate total debt
+        const debt = state.sales
+          .filter(s => s.clientId === c.id && s.status === 'pending')
+          .reduce((sum, s) => sum + Number(s.pendingAmount || 0), 0);
+
+        const isSelected = state.selectedClientId === c.id;
+
+        return `
+          <div onclick="selectClient('${c.id}')" class="p-3 rounded-xl border cursor-pointer transition flex items-center justify-between ${isSelected ? 'bg-brand-600/20 border-brand-500 text-white' : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700'}">
+            <div>
+              <p class="text-xs font-bold">${c.name}</p>
+              <p class="text-[10px] text-slate-400">${c.phone || 'Sin teléfono'}</p>
+            </div>
+            <div>
+              ${debt > 0 
+                ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-bold border border-amber-500/20">Debe: ${formatMoney(debt)}</span>`
+                : `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold">Al día</span>`
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (state.selectedClientId) {
+        renderClientDetail(state.selectedClientId);
+      }
+    }
+
+    function filterClientsList() {
+      const q = document.getElementById('clientSearchInput').value.toLowerCase();
+      const items = document.querySelectorAll('#clientsList > div');
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    function selectClient(clientId) {
+      state.selectedClientId = clientId;
+      renderClientsList();
+    }
+
+    function renderClientDetail(clientId) {
+      const client = state.clients.find(c => c.id === clientId);
+      if (!client) return;
+
+      document.getElementById('noClientSelected').classList.add('hidden');
+      document.getElementById('activeClientContent').classList.remove('hidden');
+
+      document.getElementById('selectedClientName').innerHTML = `<i class="fa-solid fa-user text-brand-400"></i> ${client.name}`;
+      document.getElementById('selectedClientSub').textContent = client.phone ? `Contacto: ${client.phone}` : 'Sin teléfono registrado';
+
+      const clientSales = state.sales.filter(s => s.clientId === clientId).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      const totalDebt = clientSales.filter(s => s.status === 'pending').reduce((sum, s) => sum + Number(s.pendingAmount || 0), 0);
+
+      const debtBadge = document.getElementById('selectedClientDebtBadge');
+      if (totalDebt > 0) {
+        debtBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20";
+        debtBadge.textContent = `Deuda Total: ${formatMoney(totalDebt)}`;
+      } else {
+        debtBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+        debtBadge.textContent = "Al día (Sin Deudas)";
+      }
+
+      const tbody = document.getElementById('clientSalesTableBody');
+      if (clientSales.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">Este cliente no posee ventas registradas aún.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = clientSales.map(sale => {
+        const isPaid = sale.status === 'paid';
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-2 font-medium text-slate-300">${sale.date}</td>
+            <td class="py-3 px-2 text-slate-300">${sale.concept || 'Sin detalle'}</td>
+            <td class="py-3 px-2 font-bold text-white">${formatMoney(sale.amount)}</td>
+            <td class="py-3 px-2">
+              ${isPaid 
+                ? `<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-[10px] font-bold">Pagado</span>` 
+                : `<span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded text-[10px] font-bold">Falta: ${formatMoney(sale.pendingAmount)}</span>`
+              }
+            </td>
+            <td class="py-3 px-2 text-right space-x-1">
+              <button onclick="openEditSaleModal('${sale.id}')" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-brand-400 rounded transition" title="Editar Venta">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button onclick="deleteSale('${sale.id}')" class="p-1.5 bg-slate-800 hover:bg-rose-900/50 text-rose-400 rounded transition" title="Eliminar Venta">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function deleteCurrentClient() {
+      if (!state.selectedClientId) return;
+      const client = state.clients.find(c => c.id === state.selectedClientId);
+      if (!confirm(`¿Estás seguro de eliminar a ${client.name}? También se borrarán sus ventas.`)) return;
+
+      state.clients = state.clients.filter(c => c.id !== state.selectedClientId);
+      state.sales = state.sales.filter(s => s.clientId !== state.selectedClientId);
+      state.selectedClientId = null;
+
+      saveStorage();
+      renderAllViews();
+      document.getElementById('activeClientContent').classList.add('hidden');
+      document.getElementById('noClientSelected').classList.remove('hidden');
+    }
+
+    function deleteSale(saleId) {
+      if (!confirm('¿Eliminar esta venta del registro?')) return;
+      state.sales = state.sales.filter(s => s.id !== saleId);
+      saveStorage();
+      renderAllViews();
+    }
+
+    // MODAL EDIT SALE LOGIC
+    function openEditSaleModal(saleId) {
+      const sale = state.sales.find(s => s.id === saleId);
+      if (!sale) return;
+
+      document.getElementById('editSaleId').value = sale.id;
+      document.getElementById('editSaleAmount').value = sale.amount;
+      document.getElementById('editSaleDate').value = sale.date;
+      document.getElementById('editSaleConcept').value = sale.concept || '';
+
+      const radios = document.getElementsByName('editPaymentStatus');
+      radios.forEach(r => {
+        if (r.value === sale.status) r.checked = true;
+      });
+
+      if (sale.status === 'pending') {
+        toggleEditPendingBox(true);
+        document.getElementById('editSalePendingAmount').value = sale.pendingAmount;
+      } else {
+        toggleEditPendingBox(false);
+      }
+
+      const modal = document.getElementById('editSaleModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function toggleEditPendingBox(show) {
+      const box = document.getElementById('editPendingBox');
+      if (show) box.classList.remove('hidden');
+      else box.classList.add('hidden');
+    }
+
+    function closeEditSaleModal() {
+      const modal = document.getElementById('editSaleModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function handleUpdateSale(e) {
+      e.preventDefault();
+      const saleId = document.getElementById('editSaleId').value;
+      const sale = state.sales.find(s => s.id === saleId);
+      if (!sale) return;
+
+      sale.amount = parseFloat(document.getElementById('editSaleAmount').value) || 0;
+      sale.date = document.getElementById('editSaleDate').value;
+      sale.concept = document.getElementById('editSaleConcept').value.trim();
+      
+      const status = document.querySelector('input[name="editPaymentStatus"]:checked').value;
+      sale.status = status;
+      sale.pendingAmount = status === 'pending' ? parseFloat(document.getElementById('editSalePendingAmount').value) || 0 : 0;
+
+      saveStorage();
+      closeEditSaleModal();
+      renderAllViews();
+    }
+
+    // MODAL NEW CLIENT LOGIC
+    function openNewClientModal() {
+      const modal = document.getElementById('newClientModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('newClientNameModal').focus(), 100);
+    }
+
+    function closeNewClientModal() {
+      const modal = document.getElementById('newClientModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.getElementById('newClientForm').reset();
+    }
+
+    function handleCreateClient(e) {
+      e.preventDefault();
+      const name = document.getElementById('newClientNameModal').value.trim();
+      const phone = document.getElementById('newClientPhoneModal').value.trim();
+
+      if (!name) return;
+
+      const newClient = {
+        id: 'c_' + Date.now(),
+        name,
+        phone
+      };
+
+      state.clients.push(newClient);
+      saveStorage();
+      closeNewClientModal();
+      renderAllViews();
+      selectClient(newClient.id);
+    }
+
+    // RENDER PENDING SALES VIEW
+    function renderPendingSales() {
+      const container = document.getElementById('pendingSalesList');
+      if (!container) return;
+
+      const pendingSales = state.sales.filter(s => s.status === 'pending');
+
+      if (pendingSales.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-16 text-center glass-card rounded-2xl">
+            <i class="fa-solid fa-circle-check text-4xl text-emerald-400 mb-3"></i>
+            <h3 class="text-base font-bold text-white">¡No hay pagos faltantes pendientes!</h3>
+            <p class="text-xs text-slate-400">Todas tus ventas registradas han sido cobradas correctamente.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = pendingSales.map(sale => {
+        const client = state.clients.find(c => c.id === sale.clientId);
+        const clientName = client ? client.name : 'Cliente Desconocido';
+
+        return `
+          <div class="glass-card p-5 rounded-2xl border border-amber-500/20 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                  <i class="fa-solid fa-clock"></i> Pendiente
+                </span>
+                <span class="text-[10px] text-slate-400">${sale.date}</span>
+              </div>
+              <h3 class="text-base font-bold text-white mt-2">${clientName}</h3>
+              <p class="text-xs text-slate-400 mt-0.5">${sale.concept || 'Sin detalle de venta'}</p>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-500 uppercase block">Falta por pagar</span>
+                <span class="text-lg font-extrabold text-amber-400">${formatMoney(sale.pendingAmount)}</span>
+                <span class="text-[10px] text-slate-400 block">(Total: ${formatMoney(sale.amount)})</span>
+              </div>
+
+              <button onclick="markAsPaid('${sale.id}')" class="px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-500 text-emerald-300 hover:text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5">
+                <i class="fa-solid fa-check"></i> Saldar Pago
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function markAsPaid(saleId) {
+      const sale = state.sales.find(s => s.id === saleId);
+      if (!sale) return;
+
+      if (confirm(`¿Confirmas que recibiste el saldo pendiente de ${formatMoney(sale.pendingAmount)}?`)) {
+        sale.status = 'paid';
+        sale.pendingAmount = 0;
+        saveStorage();
+        renderAllViews();
+      }
+    }
+
+    // SHORTCUTS MODAL TOGGLE
+    function toggleShortcutsModal() {
+      const modal = document.getElementById('shortcutsModal');
+      if (modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+  </script>
+</body>
+</html>
