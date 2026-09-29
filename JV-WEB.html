@@ -549,6 +549,31 @@
     <p>© Control de Ventas & Negocio - Sistema Web Inteligente</p>
   </footer>
 
+  <!-- FIREBASE SDK LOGIC -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS-C92KhqFG_qoTXO8wVnpYR3LAgySxt8",
+      authDomain: "jv-web-5f649.firebaseapp.com",
+      projectId: "jv-web-5f649",
+      storageBucket: "jv-web-5f649.firebasestorage.app",
+      messagingSenderId: "930175542459",
+      appId: "1:930175542459:web:2d917d83191d87112ff59e",
+      measurementId: "G-DFQLR0T5G7"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+
   <!-- MAIN SCRIPT LOGIC -->
   <script>
     // INITIAL APP STATE
@@ -1210,3 +1235,4 @@
   </script>
 </body>
 </html>
+
