@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Ventas & Clientes</title>
+  <title>Control de Ventas & Clientes - JV</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -76,7 +76,7 @@
       </div>
       <div>
         <h1 class="font-extrabold text-lg text-white tracking-tight flex items-center gap-2">
-          ControlVentas <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">PRO</span>
+          ControlVentas <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">JV</span>
         </h1>
         <p class="text-xs text-slate-400">Gestión Comercial & Pagos</p>
       </div>
@@ -94,12 +94,6 @@
         <span id="headerPendingTotal" class="text-base font-bold text-amber-400">$0.00</span>
       </div>
     </div>
-
-    <!-- KEYBOARD HINTS BUTTON -->
-    <button onclick="toggleShortcutsModal()" class="text-slate-400 hover:text-white transition bg-slate-800/60 hover:bg-slate-800 p-2.5 rounded-xl border border-slate-700/50 flex items-center gap-2 text-xs font-medium">
-      <i class="fa-solid fa-keyboard text-brand-400"></i>
-      <span class="hidden sm:inline">Atajos</span>
-    </button>
   </header>
 
   <!-- MAIN NAVIGATION TABS -->
@@ -115,7 +109,7 @@
         <i class="fa-solid fa-users"></i> Clientes & Historial
       </button>
       <button id="tabBtn-pending" onclick="switchTab('pending')" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60">
-        <i class="fa-solid fa-clock-rotate-left"></i> Cuentas Pendientes
+        <i class="fa-solid fa-clock-rotate-left"></i> Pagos Faltantes
         <span id="pendingBadge" class="hidden px-2 py-0.5 text-xs bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30">0</span>
       </button>
     </div>
@@ -127,8 +121,8 @@
     <!-- VIEW: DASHBOARD -->
     <section id="view-dashboard" class="view-content space-y-6">
       
-      <!-- CARDS SUMMARY GRID -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- CARDS SUMMARY GRID (3 CARDS) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <!-- CARD 1 -->
         <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
           <div class="flex justify-between items-start">
@@ -141,27 +135,11 @@
             </div>
           </div>
           <div class="mt-4 flex items-center text-xs text-slate-400">
-            <span>Últimos 7 días activos</span>
+            <span>Total cobrado e ingresado en la semana</span>
           </div>
         </div>
 
         <!-- CARD 2 -->
-        <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ventas Cobradas</p>
-              <h3 id="dashPaidTotal" class="text-2xl font-extrabold text-emerald-400 mt-1">$0.00</h3>
-            </div>
-            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
-              <i class="fa-solid fa-circle-check text-xl"></i>
-            </div>
-          </div>
-          <div class="mt-4 flex items-center text-xs text-slate-400">
-            <span>Ingreso efectivo liquidado</span>
-          </div>
-        </div>
-
-        <!-- CARD 3 -->
         <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
           <div class="flex justify-between items-start">
             <div>
@@ -177,7 +155,7 @@
           </div>
         </div>
 
-        <!-- CARD 4 -->
+        <!-- CARD 3 -->
         <div class="glass-card p-5 rounded-2xl relative overflow-hidden">
           <div class="flex justify-between items-start">
             <div>
@@ -203,7 +181,7 @@
               <h2 class="text-lg font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-chart-simple text-brand-400"></i> Estadísticas Semanales (7 días)
               </h2>
-              <p class="text-xs text-slate-400">Ventas registradas agrupadas por día de la semana actual</p>
+              <p class="text-xs text-slate-400">Monto cobrado en efectivo/entregas agrupado por día</p>
             </div>
             <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">En tiempo real</span>
           </div>
@@ -243,7 +221,7 @@
             </div>
             <div>
               <h2 class="text-xl font-bold text-white">Registrar Nueva Venta</h2>
-              <p class="text-xs text-slate-400">Completa los campos. Presiona <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300 text-[10px]">ENTER</kbd> para guardar rápidamente.</p>
+              <p class="text-xs text-slate-400">Ingresa el monto total y la entrega recibida.</p>
             </div>
           </div>
 
@@ -255,69 +233,60 @@
                 <select id="saleClientSelect" onchange="handleClientSelectChange(this)" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
                   <!-- Dynamic Options -->
                 </select>
-                <input type="text" id="saleNewClientInput" placeholder="Nombre de cliente nuevo" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                <input type="text" id="saleNewClientInput" placeholder="Nombre de cliente nuevo" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition hidden">
               </div>
             </div>
 
             <!-- AMOUNT & DATE GRID -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- AMOUNT -->
+              <!-- MONTO TOTAL -->
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Monto Total ($) *</label>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Monto Total de la Venta ($) *</label>
                 <div class="relative">
                   <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                  <input type="number" step="0.01" inputmode="decimal" id="saleAmount" required placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-4 py-3 text-lg font-extrabold text-white placeholder-slate-600 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                  <input type="number" step="0.01" inputmode="decimal" id="saleAmount" required placeholder="0.00" oninput="calculatePendingFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-4 py-3 text-lg font-extrabold text-white placeholder-slate-600 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
                 </div>
-                <span class="text-[11px] text-brand-400 mt-1 block"><i class="fa-solid fa-mobile-screen"></i> Despliega teclado numérico en móvil</span>
               </div>
 
-              <!-- DATE PICKER -->
+              <!-- MONTO RECIBIDO / COBRADO -->
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Fecha de la Venta *</label>
+                <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">Monto Recibido Hoy ($) *</label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400 font-bold">$</span>
+                  <input type="number" step="0.01" inputmode="decimal" id="saleReceivedAmount" required placeholder="0.00" oninput="calculatePendingFromForm()" class="w-full bg-slate-900 border border-emerald-500/40 rounded-xl pl-8 pr-4 py-3 text-lg font-extrabold text-emerald-300 placeholder-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                </div>
+                <span class="text-[11px] text-slate-400 mt-1 block">Va directo a <strong>Total Ventas Semana</strong></span>
+              </div>
+            </div>
+
+            <!-- MONTO QUE QUEDA DEBIENDO (AUTOMÁTICO O MANUAL) -->
+            <div class="p-4 bg-amber-500/10 rounded-xl border border-amber-500/20 flex items-center justify-between">
+              <div>
+                <span class="block text-xs font-semibold text-amber-400 uppercase">Monto que me deben (Pagos Faltantes)</span>
+                <span class="block text-[11px] text-slate-400">Se calcula automáticamente: Total - Recibido</span>
+              </div>
+              <span id="calculatedPendingLabel" class="text-xl font-black text-amber-400">$0.00</span>
+            </div>
+
+            <!-- DATE & CONCEPT -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Fecha de Venta *</label>
                 <input type="date" id="saleDate" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
               </div>
-            </div>
-
-            <!-- CONCEPT / DESCRIPTION -->
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Detalle o Concepto</label>
-              <input type="text" id="saleConcept" placeholder="Ej: 2 Remeras, Reparación, Producto X..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
-            </div>
-
-            <!-- PAYMENT STATUS -->
-            <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 space-y-3">
-              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Estado del Pago</label>
-              <div class="grid grid-cols-2 gap-3">
-                <label class="flex items-center gap-3 p-3 bg-slate-800/80 border border-slate-700 rounded-xl cursor-pointer hover:border-slate-600 transition">
-                  <input type="radio" name="paymentStatus" value="paid" checked onchange="togglePendingAmountInput(false)" class="text-brand-500 focus:ring-brand-500 h-4 w-4">
-                  <div>
-                    <span class="block text-sm font-semibold text-emerald-400">Pagado Total</span>
-                    <span class="block text-[10px] text-slate-400">Sin saldo pendiente</span>
-                  </div>
-                </label>
-                <label class="flex items-center gap-3 p-3 bg-slate-800/80 border border-slate-700 rounded-xl cursor-pointer hover:border-slate-600 transition">
-                  <input type="radio" name="paymentStatus" value="pending" onchange="togglePendingAmountInput(true)" class="text-brand-500 focus:ring-brand-500 h-4 w-4">
-                  <div>
-                    <span class="block text-sm font-semibold text-amber-400">Pago Faltante</span>
-                    <span class="block text-[10px] text-slate-400">Queda saldo a deber</span>
-                  </div>
-                </label>
-              </div>
-
-              <!-- PENDING AMOUNT BOX -->
-              <div id="pendingAmountBox" class="hidden pt-2 border-t border-slate-800">
-                <label class="block text-xs font-medium text-amber-300 mb-1">Monto Faltante / Restante ($)</label>
-                <input type="number" step="0.01" inputmode="decimal" id="salePendingAmount" placeholder="¿Cuánto queda debiendo?" class="w-full bg-slate-950 border border-amber-500/30 rounded-xl px-4 py-2.5 text-sm text-amber-300 placeholder-slate-600 focus:outline-none focus:border-amber-500 transition">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Detalle o Concepto</label>
+                <input type="text" id="saleConcept" placeholder="Ej: Producto X, Prenda, Servicio..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
               </div>
             </div>
 
             <!-- ACTIONS -->
             <div class="pt-4 flex items-center justify-end gap-3">
               <button type="button" onclick="switchTab('dashboard')" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition">
-                Cancelar <span class="text-xs text-slate-500">(Esc)</span>
+                Cancelar
               </button>
               <button type="submit" class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-lg shadow-brand-600/30 transition flex items-center gap-2">
-                <i class="fa-solid fa-floppy-disk"></i> Guardar Venta <span class="text-xs opacity-75">(Enter)</span>
+                <i class="fa-solid fa-floppy-disk"></i> Guardar Venta
               </button>
             </div>
           </form>
@@ -372,7 +341,7 @@
             <!-- Default Placeholder when no client is selected -->
             <div id="noClientSelected" class="py-20 text-center text-slate-500">
               <i class="fa-solid fa-user-gear text-4xl mb-3 text-slate-600"></i>
-              <p class="text-sm font-medium">Selecciona un cliente de la lista para inspeccionar sus ventas registradas.</p>
+              <p class="text-sm font-medium">Selecciona un cliente de la lista para ver su historial.</p>
             </div>
 
             <!-- Active Selected Client Details (Hidden by default) -->
@@ -382,7 +351,7 @@
                   <h3 id="selectedClientName" class="text-xl font-bold text-white flex items-center gap-2">
                     <!-- Client Name -->
                   </h3>
-                  <p id="selectedClientSub" class="text-xs text-slate-400">Historial completo de compras y pagos</p>
+                  <p id="selectedClientSub" class="text-xs text-slate-400">Historial completo de compras y entregas</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <span id="selectedClientDebtBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -401,8 +370,9 @@
                     <tr class="border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                       <th class="py-3 px-2">Fecha</th>
                       <th class="py-3 px-2">Detalle</th>
-                      <th class="py-3 px-2">Monto</th>
-                      <th class="py-3 px-2">Estado</th>
+                      <th class="py-3 px-2">Total</th>
+                      <th class="py-3 px-2">Recibido</th>
+                      <th class="py-3 px-2">Faltante</th>
                       <th class="py-3 px-2 text-right">Acciones</th>
                     </tr>
                   </thead>
@@ -424,7 +394,7 @@
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-clock-rotate-left text-amber-400"></i> Control de Pagos Faltantes
         </h2>
-        <p class="text-xs text-slate-400">Listado de todas las ventas con saldo deudor pendiente por cobrar.</p>
+        <p class="text-xs text-slate-400">Listado de todas las ventas con saldo pendiente por cobrar.</p>
       </div>
 
       <div id="pendingSalesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -433,6 +403,42 @@
     </section>
 
   </main>
+
+  <!-- MODAL: PAY PARTIAL / ABONO -->
+  <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="glass-card w-full max-w-md p-6 rounded-2xl shadow-2xl relative border border-slate-700/80">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-hand-holding-dollar text-emerald-400"></i> Registrar Entrega / Pago
+        </h3>
+        <button onclick="closePaymentModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="paymentForm" onsubmit="handleSavePayment(event)" class="space-y-4 mt-4">
+        <input type="hidden" id="paymentSaleId">
+
+        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-1">
+          <p id="paymentClientName" class="text-sm font-bold text-white"></p>
+          <p id="paymentSaleInfo" class="text-xs text-slate-400"></p>
+          <div class="flex justify-between items-center pt-2">
+            <span class="text-xs text-amber-400 font-semibold">Deuda Faltante Actual:</span>
+            <span id="paymentCurrentDebt" class="text-base font-extrabold text-amber-400">$0.00</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">Monto Entregado ($) *</label>
+          <input type="number" step="0.01" inputmode="decimal" id="paymentAmountInput" required placeholder="¿Cuánto te entregó hoy?" class="w-full bg-slate-900 border border-emerald-500/40 rounded-xl px-4 py-3 text-lg font-extrabold text-emerald-300 focus:outline-none focus:border-emerald-500">
+          <span class="text-[11px] text-slate-400 mt-1 block">Este monto irá directo a <strong>Total Ventas Semana</strong> y se restará del saldo.</span>
+        </div>
+
+        <div class="pt-4 flex justify-end gap-3 border-t border-slate-800">
+          <button type="button" onclick="closePaymentModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30">Guardar Entrega</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- MODAL: EDIT SALE -->
   <div id="editSaleModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
@@ -453,6 +459,11 @@
         </div>
 
         <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Monto Recibido ($)</label>
+          <input type="number" step="0.01" inputmode="decimal" id="editSaleReceivedAmount" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
           <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Fecha de Venta</label>
           <input type="date" id="editSaleDate" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
         </div>
@@ -462,28 +473,9 @@
           <input type="text" id="editSaleConcept" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
         </div>
 
-        <div class="space-y-2 pt-2 border-t border-slate-800">
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Estado de Pago</label>
-          <div class="grid grid-cols-2 gap-3">
-            <label class="flex items-center gap-2 p-2.5 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer">
-              <input type="radio" name="editPaymentStatus" value="paid" onchange="toggleEditPendingBox(false)">
-              <span class="text-xs font-medium text-emerald-400">Pagado</span>
-            </label>
-            <label class="flex items-center gap-2 p-2.5 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer">
-              <input type="radio" name="editPaymentStatus" value="pending" onchange="toggleEditPendingBox(true)">
-              <span class="text-xs font-medium text-amber-400">Pago Faltante</span>
-            </label>
-          </div>
-        </div>
-
-        <div id="editPendingBox" class="hidden">
-          <label class="block text-xs font-medium text-amber-300 mb-1">Saldo Faltante ($)</label>
-          <input type="number" step="0.01" inputmode="decimal" id="editSalePendingAmount" class="w-full bg-slate-900 border border-amber-500/30 rounded-xl px-4 py-2 text-sm text-amber-300">
-        </div>
-
         <div class="pt-4 flex justify-end gap-3 border-t border-slate-800">
-          <button type="button" onclick="closeEditSaleModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Cancelar (Esc)</button>
-          <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold">Guardar Cambios (Enter)</button>
+          <button type="button" onclick="closeEditSaleModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold">Guardar Cambios</button>
         </div>
       </form>
     </div>
@@ -510,55 +502,24 @@
         </div>
 
         <div class="pt-4 flex justify-end gap-3 border-t border-slate-800">
-          <button type="button" onclick="closeNewClientModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Cancelar (Esc)</button>
-          <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold">Crear Cliente (Enter)</button>
+          <button type="button" onclick="closeNewClientModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold">Crear Cliente</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: KEYBOARD SHORTCUTS HINT -->
-  <div id="shortcutsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="glass-card w-full max-w-sm p-6 rounded-2xl shadow-2xl relative border border-slate-700/80">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-keyboard text-brand-400"></i> Atajos de Teclado
-        </h3>
-        <button onclick="toggleShortcutsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="space-y-3 py-4 text-xs text-slate-300">
-        <div class="flex items-center justify-between p-2 bg-slate-900/80 rounded-lg">
-          <span>Guardar formulario / Confirmar</span>
-          <kbd class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-brand-400 font-bold">ENTER</kbd>
-        </div>
-        <div class="flex items-center justify-between p-2 bg-slate-900/80 rounded-lg">
-          <span>Cerrar pestañas / Salir de modales</span>
-          <kbd class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-amber-400 font-bold">ESC</kbd>
-        </div>
-        <div class="flex items-center justify-between p-2 bg-slate-900/80 rounded-lg">
-          <span>Apertura teclado numérico (Móvil)</span>
-          <span class="text-slate-400">Automático en campos de monto</span>
-        </div>
-      </div>
-      <button onclick="toggleShortcutsModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold">Entendido</button>
-    </div>
-  </div>
-
   <!-- FOOTER -->
   <footer class="border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500">
-    <p>© Control de Ventas & Negocio - Sistema Web Inteligente</p>
+    <p>© Control de Ventas & Negocio - JV</p>
   </footer>
 
-  <!-- FIREBASE SDK LOGIC -->
+  <!-- FIREBASE SDK & APP LOGIC -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    // Configuración de tu Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCS-C92KhqFG_qoTXO8wVnpYR3LAgySxt8",
       authDomain: "jv-web-5f649.firebaseapp.com",
@@ -569,46 +530,76 @@
       measurementId: "G-DFQLR0T5G7"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-  </script>
+    const db = getFirestore(app);
 
-  <!-- MAIN SCRIPT LOGIC -->
-  <script>
-    // INITIAL APP STATE
-    let state = {
-      clients: [
-        { id: 'c1', name: 'Juan Gómez', phone: '+54 9 351 1234567' },
-        { id: 'c2', name: 'Laura Martinez', phone: '+54 9 351 9876543' },
-        { id: 'c3', name: 'Carlos López', phone: '+54 9 351 5554433' }
-      ],
-      sales: [
-        { id: 's1', clientId: 'c1', amount: 15000, date: getFormattedDate(0), concept: 'Mantenimiento General', status: 'paid', pendingAmount: 0 },
-        { id: 's2', clientId: 'c2', amount: 28000, date: getFormattedDate(-1), concept: 'Pedido Especial x3', status: 'pending', pendingAmount: 8000 },
-        { id: 's3', clientId: 'c3', amount: 12500, date: getFormattedDate(-2), concept: 'Accesorios Varios', status: 'paid', pendingAmount: 0 },
-        { id: 's4', clientId: 'c1', amount: 9500, date: getFormattedDate(-4), concept: 'Repuesto Original', status: 'pending', pendingAmount: 3500 }
-      ],
+    // Estado global en memoria
+    window.state = {
+      clients: [],
+      sales: [],
+      payments: [], // Registro de abonos
       activeTab: 'dashboard',
       selectedClientId: null
     };
 
-    let salesChartInstance = null;
+    window.salesChartInstance = null;
 
-    // LOCAL STORAGE LOAD/SAVE
-    function loadStorage() {
-      const savedClients = localStorage.getItem('cv_clients');
-      const savedSales = localStorage.getItem('cv_sales');
-      if (savedClients) state.clients = JSON.parse(savedClients);
-      if (savedSales) state.sales = JSON.parse(savedSales);
+    // ESCUCHAR CAMBIOS EN TIEMPO REAL DESDE FIREBASE (MÓVIL O PC)
+    function initRealtimeSync() {
+      // Clientes
+      onSnapshot(collection(db, "clients"), (snapshot) => {
+        window.state.clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        window.renderAllViews();
+      });
+
+      // Ventas
+      onSnapshot(collection(db, "sales"), (snapshot) => {
+        window.state.sales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        window.renderAllViews();
+      });
+
+      // Abonos / Entregas
+      onSnapshot(collection(db, "payments"), (snapshot) => {
+        window.state.payments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        window.renderAllViews();
+      });
     }
 
-    function saveStorage() {
-      localStorage.setItem('cv_clients', JSON.stringify(state.clients));
-      localStorage.setItem('cv_sales', JSON.stringify(state.sales));
-    }
+    // OPERACIONES BASE DE DATOS EN LA NUBE
+    window.dbSaveClient = async function(client) {
+      await setDoc(doc(db, "clients", client.id), client);
+    };
 
-    // HELPER: GET FORMATTED DATE (YYYY-MM-DD) WITH OFFSET
+    window.dbDeleteClient = async function(clientId) {
+      await deleteDoc(doc(db, "clients", clientId));
+    };
+
+    window.dbSaveSale = async function(sale) {
+      await setDoc(doc(db, "sales", sale.id), sale);
+    };
+
+    window.dbUpdateSale = async function(saleId, updatedData) {
+      await updateDoc(doc(db, "sales", saleId), updatedData);
+    };
+
+    window.dbDeleteSale = async function(saleId) {
+      await deleteDoc(doc(db, "sales", saleId));
+    };
+
+    window.dbSavePayment = async function(payment) {
+      await setDoc(doc(db, "payments", payment.id), payment);
+    };
+
+    // Iniciar escucha al cargar
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('saleDate').value = getFormattedDate(0);
+      initRealtimeSync();
+    });
+  </script>
+
+  <!-- MAIN SCRIPT LOGIC -->
+  <script>
+    // HELPER: FORMAT DATES
     function getFormattedDate(offsetDays = 0) {
       const d = new Date();
       d.setDate(d.getDate() + offsetDays);
@@ -620,44 +611,19 @@
       return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(amount || 0);
     }
 
-    // INIT METHOD
-    window.addEventListener('DOMContentLoaded', () => {
-      loadStorage();
-      document.getElementById('saleDate').value = getFormattedDate(0);
-      setupGlobalKeyboardListeners();
-      renderAllViews();
-    });
-
-    // GLOBAL KEYBOARD LISTENER (ESC & ENTER HANDLING)
-    function setupGlobalKeyboardListeners() {
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          // Check Modals first
-          if (!document.getElementById('editSaleModal').classList.contains('hidden')) {
-            closeEditSaleModal();
-            return;
-          }
-          if (!document.getElementById('newClientModal').classList.contains('hidden')) {
-            closeNewClientModal();
-            return;
-          }
-          if (!document.getElementById('shortcutsModal').classList.contains('hidden')) {
-            toggleShortcutsModal();
-            return;
-          }
-          // If in tabs other than dashboard, return to dashboard
-          if (state.activeTab !== 'dashboard') {
-            switchTab('dashboard');
-          }
-        }
-      });
+    // CÁLCULO DINÁMICO EN EL FORMULARIO
+    function calculatePendingFromForm() {
+      const amount = parseFloat(document.getElementById('saleAmount').value) || 0;
+      const received = parseFloat(document.getElementById('saleReceivedAmount').value) || 0;
+      const pending = Math.max(0, amount - received);
+      
+      document.getElementById('calculatedPendingLabel').textContent = formatMoney(pending);
     }
 
     // TAB SWITCHING LOGIC
     function switchTab(tabId) {
       state.activeTab = tabId;
       
-      // Update Tab UI
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.className = 'tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60';
       });
@@ -667,14 +633,11 @@
         activeBtn.className = 'tab-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap bg-brand-600 text-white shadow-lg shadow-brand-600/30';
       }
 
-      // Hide all content views
       document.querySelectorAll('.view-content').forEach(view => view.classList.add('hidden'));
 
-      // Show requested view
       const targetView = document.getElementById(`view-${tabId}`);
       if (targetView) targetView.classList.remove('hidden');
 
-      // Refresh specific tab logic
       if (tabId === 'sales') {
         populateClientSelectOptions();
         setTimeout(() => document.getElementById('saleAmount').focus(), 100);
@@ -703,30 +666,38 @@
     function renderSummaryMetrics() {
       const todayStr = getFormattedDate(0);
       
-      const todayTotal = state.sales
+      // Total de cobros hoy (Efectivo inicial de ventas + Abonos recibidos hoy)
+      const todaySalesReceived = state.sales
         .filter(s => s.date === todayStr)
-        .reduce((sum, s) => sum + Number(s.amount), 0);
+        .reduce((sum, s) => sum + Number(s.receivedAmount || 0), 0);
 
+      const todayPayments = state.payments
+        .filter(p => p.date === todayStr)
+        .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+      const todayTotal = todaySalesReceived + todayPayments;
+
+      // Saldo total pendiente (Pagos faltantes)
       const pendingTotal = state.sales
-        .filter(s => s.status === 'pending')
         .reduce((sum, s) => sum + Number(s.pendingAmount || 0), 0);
 
-      const paidTotal = state.sales
-        .reduce((sum, s) => sum + (Number(s.amount) - Number(s.pendingAmount || 0)), 0);
+      // Total Ventas Semana (Todo lo cobrado: receivedAmount + abonos)
+      const totalSalesReceivedSum = state.sales
+        .reduce((sum, s) => sum + Number(s.receivedAmount || 0), 0);
 
-      const weeklyTotal = state.sales
-        .reduce((sum, s) => sum + Number(s.amount), 0);
+      const totalPaymentsSum = state.payments
+        .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+      const weeklyTotal = totalSalesReceivedSum + totalPaymentsSum;
 
       document.getElementById('headerTodayTotal').textContent = formatMoney(todayTotal);
       document.getElementById('headerPendingTotal').textContent = formatMoney(pendingTotal);
 
       document.getElementById('dashWeeklyTotal').textContent = formatMoney(weeklyTotal);
-      document.getElementById('dashPaidTotal').textContent = formatMoney(paidTotal);
       document.getElementById('dashPendingTotal').textContent = formatMoney(pendingTotal);
       document.getElementById('dashClientsCount').textContent = state.clients.length;
 
-      // Pending badge update
-      const pendingCount = state.sales.filter(s => s.status === 'pending').length;
+      const pendingCount = state.sales.filter(s => s.pendingAmount > 0).length;
       const badge = document.getElementById('pendingBadge');
       if (pendingCount > 0) {
         badge.textContent = pendingCount;
@@ -736,15 +707,13 @@
       }
     }
 
-    // RENDER CHART (7 DAYS SALES)
+    // RENDER CHART (7 DAYS COBRANZA REAL)
     function renderChart() {
       const ctx = document.getElementById('salesChart');
       if (!ctx) return;
 
-      // Calculate last 7 days sales
       const daysLabels = [];
       const salesData = [];
-      
       const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
       for (let i = 6; i >= 0; i--) {
@@ -753,12 +722,17 @@
         const dateStr = d.toISOString().split('T')[0];
         const dayLabel = `${dayNames[d.getDay()]} ${d.getDate()}`;
         
-        const totalDay = state.sales
+        // Dinero ingresado en este día
+        const daySales = state.sales
           .filter(s => s.date === dateStr)
-          .reduce((sum, s) => sum + Number(s.amount), 0);
+          .reduce((sum, s) => sum + Number(s.receivedAmount || 0), 0);
+
+        const dayPayments = state.payments
+          .filter(p => p.date === dateStr)
+          .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
         daysLabels.push(dayLabel);
-        salesData.push(totalDay);
+        salesData.push(daySales + dayPayments);
       }
 
       if (salesChartInstance) {
@@ -770,7 +744,7 @@
         data: {
           labels: daysLabels,
           datasets: [{
-            label: 'Ventas Total ($)',
+            label: 'Ingreso Efectivo ($)',
             data: salesData,
             backgroundColor: 'rgba(59, 130, 246, 0.6)',
             borderColor: '#3b82f6',
@@ -787,7 +761,7 @@
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return 'Vendido: ' + formatMoney(context.raw);
+                  return 'Ingresado: ' + formatMoney(context.raw);
                 }
               }
             }
@@ -821,7 +795,7 @@
       container.innerHTML = sortedSales.map(sale => {
         const client = state.clients.find(c => c.id === sale.clientId);
         const clientName = client ? client.name : 'Cliente Eliminado';
-        const isPaid = sale.status === 'paid';
+        const hasPending = (sale.pendingAmount || 0) > 0;
 
         return `
           <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800/80">
@@ -830,9 +804,9 @@
               <p class="text-[10px] text-slate-400">${sale.date} • ${sale.concept || 'Sin detalle'}</p>
             </div>
             <div class="text-right">
-              <span class="text-xs font-extrabold block ${isPaid ? 'text-emerald-400' : 'text-amber-400'}">${formatMoney(sale.amount)}</span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded ${isPaid ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">
-                ${isPaid ? 'Pagado' : 'Falta: ' + formatMoney(sale.pendingAmount)}
+              <span class="text-xs font-extrabold block text-white">${formatMoney(sale.amount)}</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded ${hasPending ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400'}">
+                ${hasPending ? 'Falta: ' + formatMoney(sale.pendingAmount) : 'Saldado Total'}
               </span>
             </div>
           </div>
@@ -867,21 +841,8 @@
       }
     }
 
-    function togglePendingAmountInput(show) {
-      const box = document.getElementById('pendingAmountBox');
-      const input = document.getElementById('salePendingAmount');
-      if (show) {
-        box.classList.remove('hidden');
-        input.required = true;
-      } else {
-        box.classList.add('hidden');
-        input.required = false;
-        input.value = '';
-      }
-    }
-
     // HANDLE SAVE SALE FORM
-    function handleSaveSale(e) {
+    async function handleSaveSale(e) {
       e.preventDefault();
 
       let clientId = document.getElementById('saleClientSelect').value;
@@ -894,7 +855,7 @@
           name: newClientName,
           phone: ''
         };
-        state.clients.push(newClient);
+        await dbSaveClient(newClient);
         clientId = newClient.id;
       }
 
@@ -904,30 +865,31 @@
       }
 
       const amount = parseFloat(document.getElementById('saleAmount').value) || 0;
+      const receivedAmount = parseFloat(document.getElementById('saleReceivedAmount').value) || 0;
       const date = document.getElementById('saleDate').value;
       const concept = document.getElementById('saleConcept').value.trim();
-      const paymentStatus = document.querySelector('input[name="paymentStatus"]:checked').value;
-      const pendingAmount = paymentStatus === 'pending' ? parseFloat(document.getElementById('salePendingAmount').value) || 0 : 0;
+      
+      const pendingAmount = Math.max(0, amount - receivedAmount);
+      const status = pendingAmount === 0 ? 'paid' : 'pending';
 
       const newSale = {
         id: 's_' + Date.now(),
         clientId,
         amount,
+        receivedAmount,
+        pendingAmount,
+        status,
         date,
-        concept,
-        status: paymentStatus,
-        pendingAmount
+        concept
       };
 
-      state.sales.unshift(newSale);
-      saveStorage();
+      await dbSaveSale(newSale);
 
       // Reset Form
       document.getElementById('saleForm').reset();
       document.getElementById('saleDate').value = getFormattedDate(0);
-      togglePendingAmountInput(false);
+      calculatePendingFromForm();
 
-      // Notification & redirect
       alert('¡Venta registrada con éxito!');
       switchTab('dashboard');
     }
@@ -946,9 +908,8 @@
       }
 
       container.innerHTML = state.clients.map(c => {
-        // Calculate total debt
         const debt = state.sales
-          .filter(s => s.clientId === c.id && s.status === 'pending')
+          .filter(s => s.clientId === c.id)
           .reduce((sum, s) => sum + Number(s.pendingAmount || 0), 0);
 
         const isSelected = state.selectedClientId === c.id;
@@ -1000,7 +961,7 @@
 
       const clientSales = state.sales.filter(s => s.clientId === clientId).sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      const totalDebt = clientSales.filter(s => s.status === 'pending').reduce((sum, s) => sum + Number(s.pendingAmount || 0), 0);
+      const totalDebt = clientSales.reduce((sum, s) => sum + Number(s.pendingAmount || 0), 0);
 
       const debtBadge = document.getElementById('selectedClientDebtBadge');
       if (totalDebt > 0) {
@@ -1013,24 +974,30 @@
 
       const tbody = document.getElementById('clientSalesTableBody');
       if (clientSales.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">Este cliente no posee ventas registradas aún.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500">Este cliente no posee ventas registradas aún.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = clientSales.map(sale => {
-        const isPaid = sale.status === 'paid';
+        const isPaid = (sale.pendingAmount || 0) <= 0;
         return `
           <tr class="hover:bg-slate-800/40 transition">
             <td class="py-3 px-2 font-medium text-slate-300">${sale.date}</td>
             <td class="py-3 px-2 text-slate-300">${sale.concept || 'Sin detalle'}</td>
             <td class="py-3 px-2 font-bold text-white">${formatMoney(sale.amount)}</td>
+            <td class="py-3 px-2 text-emerald-400 font-semibold">${formatMoney(sale.receivedAmount)}</td>
             <td class="py-3 px-2">
               ${isPaid 
-                ? `<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-[10px] font-bold">Pagado</span>` 
-                : `<span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded text-[10px] font-bold">Falta: ${formatMoney(sale.pendingAmount)}</span>`
+                ? `<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-[10px] font-bold">Saldado</span>` 
+                : `<span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded text-[10px] font-bold">${formatMoney(sale.pendingAmount)}</span>`
               }
             </td>
             <td class="py-3 px-2 text-right space-x-1">
+              ${!isPaid ? `
+                <button onclick="openPaymentModal('${sale.id}')" class="p-1.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white rounded transition" title="Registrar Entrega">
+                  <i class="fa-solid fa-hand-holding-dollar"></i>
+                </button>
+              ` : ''}
               <button onclick="openEditSaleModal('${sale.id}')" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-brand-400 rounded transition" title="Editar Venta">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
@@ -1043,26 +1010,25 @@
       }).join('');
     }
 
-    function deleteCurrentClient() {
+    async function deleteCurrentClient() {
       if (!state.selectedClientId) return;
       const client = state.clients.find(c => c.id === state.selectedClientId);
       if (!confirm(`¿Estás seguro de eliminar a ${client.name}? También se borrarán sus ventas.`)) return;
 
-      state.clients = state.clients.filter(c => c.id !== state.selectedClientId);
-      state.sales = state.sales.filter(s => s.clientId !== state.selectedClientId);
-      state.selectedClientId = null;
+      const clientSales = state.sales.filter(s => s.clientId === state.selectedClientId);
+      for (let s of clientSales) {
+        await dbDeleteSale(s.id);
+      }
+      await dbDeleteClient(state.selectedClientId);
 
-      saveStorage();
-      renderAllViews();
+      state.selectedClientId = null;
       document.getElementById('activeClientContent').classList.add('hidden');
       document.getElementById('noClientSelected').classList.remove('hidden');
     }
 
-    function deleteSale(saleId) {
+    async function deleteSale(saleId) {
       if (!confirm('¿Eliminar esta venta del registro?')) return;
-      state.sales = state.sales.filter(s => s.id !== saleId);
-      saveStorage();
-      renderAllViews();
+      await dbDeleteSale(saleId);
     }
 
     // MODAL EDIT SALE LOGIC
@@ -1072,30 +1038,13 @@
 
       document.getElementById('editSaleId').value = sale.id;
       document.getElementById('editSaleAmount').value = sale.amount;
+      document.getElementById('editSaleReceivedAmount').value = sale.receivedAmount || 0;
       document.getElementById('editSaleDate').value = sale.date;
       document.getElementById('editSaleConcept').value = sale.concept || '';
-
-      const radios = document.getElementsByName('editPaymentStatus');
-      radios.forEach(r => {
-        if (r.value === sale.status) r.checked = true;
-      });
-
-      if (sale.status === 'pending') {
-        toggleEditPendingBox(true);
-        document.getElementById('editSalePendingAmount').value = sale.pendingAmount;
-      } else {
-        toggleEditPendingBox(false);
-      }
 
       const modal = document.getElementById('editSaleModal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-    }
-
-    function toggleEditPendingBox(show) {
-      const box = document.getElementById('editPendingBox');
-      if (show) box.classList.remove('hidden');
-      else box.classList.add('hidden');
     }
 
     function closeEditSaleModal() {
@@ -1104,23 +1053,87 @@
       modal.classList.remove('flex');
     }
 
-    function handleUpdateSale(e) {
+    async function handleUpdateSale(e) {
       e.preventDefault();
       const saleId = document.getElementById('editSaleId').value;
+      
+      const amount = parseFloat(document.getElementById('editSaleAmount').value) || 0;
+      const receivedAmount = parseFloat(document.getElementById('editSaleReceivedAmount').value) || 0;
+      const date = document.getElementById('editSaleDate').value;
+      const concept = document.getElementById('editSaleConcept').value.trim();
+
+      const pendingAmount = Math.max(0, amount - receivedAmount);
+      const status = pendingAmount === 0 ? 'paid' : 'pending';
+
+      await dbUpdateSale(saleId, {
+        amount,
+        receivedAmount,
+        pendingAmount,
+        status,
+        date,
+        concept
+      });
+
+      closeEditSaleModal();
+    }
+
+    // MODAL ABONO / ENTREGA DE DEUDA
+    function openPaymentModal(saleId) {
       const sale = state.sales.find(s => s.id === saleId);
       if (!sale) return;
 
-      sale.amount = parseFloat(document.getElementById('editSaleAmount').value) || 0;
-      sale.date = document.getElementById('editSaleDate').value;
-      sale.concept = document.getElementById('editSaleConcept').value.trim();
-      
-      const status = document.querySelector('input[name="editPaymentStatus"]:checked').value;
-      sale.status = status;
-      sale.pendingAmount = status === 'pending' ? parseFloat(document.getElementById('editSalePendingAmount').value) || 0 : 0;
+      const client = state.clients.find(c => c.id === sale.clientId);
 
-      saveStorage();
-      closeEditSaleModal();
-      renderAllViews();
+      document.getElementById('paymentSaleId').value = sale.id;
+      document.getElementById('paymentClientName').textContent = client ? client.name : 'Cliente';
+      document.getElementById('paymentSaleInfo').textContent = `Venta de fecha ${sale.date} (${sale.concept || 'Sin detalle'})`;
+      document.getElementById('paymentCurrentDebt').textContent = formatMoney(sale.pendingAmount);
+      document.getElementById('paymentAmountInput').value = '';
+
+      const modal = document.getElementById('paymentModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('paymentAmountInput').focus(), 100);
+    }
+
+    function closePaymentModal() {
+      const modal = document.getElementById('paymentModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function handleSavePayment(e) {
+      e.preventDefault();
+      const saleId = document.getElementById('paymentSaleId').value;
+      const sale = state.sales.find(s => s.id === saleId);
+      if (!sale) return;
+
+      const paidNow = parseFloat(document.getElementById('paymentAmountInput').value) || 0;
+      if (paidNow <= 0) return;
+
+      const newReceivedAmount = Number(sale.receivedAmount || 0) + paidNow;
+      const newPendingAmount = Math.max(0, Number(sale.amount) - newReceivedAmount);
+      const newStatus = newPendingAmount === 0 ? 'paid' : 'pending';
+
+      // 1. Guardar registro del abono recibido hoy
+      const paymentDoc = {
+        id: 'p_' + Date.now(),
+        saleId: sale.id,
+        clientId: sale.clientId,
+        amount: paidNow,
+        date: getFormattedDate(0)
+      };
+      await dbSavePayment(paymentDoc);
+
+      // 2. Actualizar venta original
+      await dbUpdateSale(sale.id, {
+        receivedAmount: newReceivedAmount,
+        pendingAmount: newPendingAmount,
+        status: newStatus
+      });
+
+      closePaymentModal();
+      alert(`¡Entrega de ${formatMoney(paidNow)} registrada correctamente!`);
     }
 
     // MODAL NEW CLIENT LOGIC
@@ -1138,7 +1151,7 @@
       document.getElementById('newClientForm').reset();
     }
 
-    function handleCreateClient(e) {
+    async function handleCreateClient(e) {
       e.preventDefault();
       const name = document.getElementById('newClientNameModal').value.trim();
       const phone = document.getElementById('newClientPhoneModal').value.trim();
@@ -1151,10 +1164,8 @@
         phone
       };
 
-      state.clients.push(newClient);
-      saveStorage();
+      await dbSaveClient(newClient);
       closeNewClientModal();
-      renderAllViews();
       selectClient(newClient.id);
     }
 
@@ -1163,7 +1174,7 @@
       const container = document.getElementById('pendingSalesList');
       if (!container) return;
 
-      const pendingSales = state.sales.filter(s => s.status === 'pending');
+      const pendingSales = state.sales.filter(s => (s.pendingAmount || 0) > 0);
 
       if (pendingSales.length === 0) {
         container.innerHTML = `
@@ -1185,7 +1196,7 @@
             <div>
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-amber-400 flex items-center gap-1">
-                  <i class="fa-solid fa-clock"></i> Pendiente
+                  <i class="fa-solid fa-clock"></i> Saldo Pendiente
                 </span>
                 <span class="text-[10px] text-slate-400">${sale.date}</span>
               </div>
@@ -1197,42 +1208,17 @@
               <div>
                 <span class="text-[10px] text-slate-500 uppercase block">Falta por pagar</span>
                 <span class="text-lg font-extrabold text-amber-400">${formatMoney(sale.pendingAmount)}</span>
-                <span class="text-[10px] text-slate-400 block">(Total: ${formatMoney(sale.amount)})</span>
+                <span class="text-[10px] text-slate-400 block">(Total Venta: ${formatMoney(sale.amount)})</span>
               </div>
 
-              <button onclick="markAsPaid('${sale.id}')" class="px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-500 text-emerald-300 hover:text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5">
-                <i class="fa-solid fa-check"></i> Saldar Pago
+              <button onclick="openPaymentModal('${sale.id}')" class="px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-500 text-emerald-300 hover:text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5">
+                <i class="fa-solid fa-hand-holding-dollar"></i> Registrar Entrega
               </button>
             </div>
           </div>
         `;
       }).join('');
     }
-
-    function markAsPaid(saleId) {
-      const sale = state.sales.find(s => s.id === saleId);
-      if (!sale) return;
-
-      if (confirm(`¿Confirmas que recibiste el saldo pendiente de ${formatMoney(sale.pendingAmount)}?`)) {
-        sale.status = 'paid';
-        sale.pendingAmount = 0;
-        saveStorage();
-        renderAllViews();
-      }
-    }
-
-    // SHORTCUTS MODAL TOGGLE
-    function toggleShortcutsModal() {
-      const modal = document.getElementById('shortcutsModal');
-      if (modal.classList.contains('hidden')) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      } else {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-    }
   </script>
 </body>
 </html>
-
