@@ -72,7 +72,7 @@
   <header class="sticky top-0 z-40 glass-card border-b border-slate-800/80 px-4 lg:px-8 py-3 flex items-center justify-between">
     <div class="flex items-center space-x-3">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
-        <i class="fa-solid fa-[#000] fa-chart-line text-white text-lg"></i>
+        <i class="fa-solid fa-chart-line text-white text-lg"></i>
       </div>
       <div>
         <h1 class="font-extrabold text-lg text-white tracking-tight flex items-center gap-2">
@@ -516,12 +516,10 @@
 
   <!-- FIREBASE SDK & APP LOGIC -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCS-C92KhqFG_qoTXO8wVnpYR3LAgySxt8",
       authDomain: "jv-web-5f649.firebaseapp.com",
@@ -532,69 +530,78 @@
       measurementId: "G-DFQLR0T5G7"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
-    // Estado global en memoria
     window.state = {
       clients: [],
       sales: [],
-      payments: [], // Registro de abonos
+      payments: [],
       activeTab: 'dashboard',
       selectedClientId: null
     };
 
     window.salesChartInstance = null;
 
-    // ESCUCHAR CAMBIOS EN TIEMPO REAL DESDE FIREBASE (MÓVIL O PC)
     function initRealtimeSync() {
-      // Clientes
       onSnapshot(collection(db, "clients"), (snapshot) => {
         window.state.clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         window.renderAllViews();
       });
 
-      // Ventas
       onSnapshot(collection(db, "sales"), (snapshot) => {
         window.state.sales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         window.renderAllViews();
       });
 
-      // Abonos / Entregas
       onSnapshot(collection(db, "payments"), (snapshot) => {
         window.state.payments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         window.renderAllViews();
       });
     }
 
-    // OPERACIONES BASE DE DATOS EN LA NUBE
     window.dbSaveClient = async function(client) {
       await setDoc(doc(db, "clients", client.id), client);
+      const index = window.state.clients.findIndex(c => c.id === client.id);
+      if (index >= 0) window.state.clients[index] = client;
+      else window.state.clients.push(client);
+      window.renderAllViews();
     };
 
     window.dbDeleteClient = async function(clientId) {
       await deleteDoc(doc(db, "clients", clientId));
+      window.state.clients = window.state.clients.filter(c => c.id !== clientId);
+      window.renderAllViews();
     };
 
     window.dbSaveSale = async function(sale) {
       await setDoc(doc(db, "sales", sale.id), sale);
+      window.state.sales.push(sale);
+      window.renderAllViews();
     };
 
     window.dbUpdateSale = async function(saleId, updatedData) {
       await updateDoc(doc(db, "sales", saleId), updatedData);
+      const index = window.state.sales.findIndex(s => s.id === saleId);
+      if (index >= 0) {
+        window.state.sales[index] = { ...window.state.sales[index], ...updatedData };
+      }
+      window.renderAllViews();
     };
 
     window.dbDeleteSale = async function(saleId) {
       await deleteDoc(doc(db, "sales", saleId));
+      window.state.sales = window.state.sales.filter(s => s.id !== saleId);
+      window.renderAllViews();
     };
 
     window.dbSavePayment = async function(payment) {
       await setDoc(doc(db, "payments", payment.id), payment);
+      window.state.payments.push(payment);
+      window.renderAllViews();
     };
 
-    // Iniciar escucha al cargar
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('saleDate').value = getFormattedDate(0);
       initRealtimeSync();
@@ -603,19 +610,16 @@
 
   <!-- MAIN SCRIPT LOGIC -->
   <script>
-    // HELPER: FORMAT DATES
     function getFormattedDate(offsetDays = 0) {
       const d = new Date();
       d.setDate(d.getDate() + offsetDays);
       return d.toISOString().split('T')[0];
     }
 
-    // HELPER: FORMAT CURRENCY
     function formatMoney(amount) {
       return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(amount || 0);
     }
 
-    // CÁLCULO DINÁMICO EN EL FORMULARIO
     function calculatePendingFromForm() {
       const amount = parseFloat(document.getElementById('saleAmount').value) || 0;
       const received = parseFloat(document.getElementById('saleReceivedAmount').value) || 0;
@@ -624,7 +628,6 @@
       document.getElementById('calculatedPendingLabel').textContent = formatMoney(pending);
     }
 
-    // TAB SWITCHING LOGIC
     function switchTab(tabId) {
       state.activeTab = tabId;
       
@@ -656,7 +659,6 @@
       renderSummaryMetrics();
     }
 
-    // RENDER ALL VIEWS
     function renderAllViews() {
       renderSummaryMetrics();
       renderChart();
@@ -665,12 +667,11 @@
       renderClientsList();
       renderPendingSales();
     }
+    window.renderAllViews = renderAllViews;
 
-    // RENDER METRICS SUMMARY
     function renderSummaryMetrics() {
       const todayStr = getFormattedDate(0);
       
-      // Total de cobros hoy (Efectivo inicial de ventas + Abonos recibidos hoy)
       const todaySalesReceived = state.sales
         .filter(s => s.date === todayStr)
         .reduce((sum, s) => sum + Number(s.receivedAmount || 0), 0);
@@ -681,37 +682,36 @@
 
       const todayTotal = todaySalesReceived + todayPayments;
 
-      // Saldo total pendiente (Pagos faltantes)
       const pendingTotal = state.sales
         .reduce((sum, s) => sum + Number(s.pendingAmount || 0), 0);
 
-      // Total Ventas Semana (Todo lo cobrado: receivedAmount + abonos)
       const totalSalesReceivedSum = state.sales
         .reduce((sum, s) => sum + Number(s.receivedAmount || 0), 0);
 
       const totalPaymentsSum = state.payments
         .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
-      const weeklyTotal = totalSalesReceivedSum + totalPaymentsSum;
+      const totalIncomeReal = totalSalesReceivedSum + totalPaymentsSum;
 
       document.getElementById('headerTodayTotal').textContent = formatMoney(todayTotal);
       document.getElementById('headerPendingTotal').textContent = formatMoney(pendingTotal);
 
-      document.getElementById('dashWeeklyTotal').textContent = formatMoney(weeklyTotal);
+      document.getElementById('dashWeeklyTotal').textContent = formatMoney(totalIncomeReal);
       document.getElementById('dashPendingTotal').textContent = formatMoney(pendingTotal);
       document.getElementById('dashClientsCount').textContent = state.clients.length;
 
-      const pendingCount = state.sales.filter(s => s.pendingAmount > 0).length;
+      const pendingCount = state.sales.filter(s => (s.pendingAmount || 0) > 0).length;
       const badge = document.getElementById('pendingBadge');
-      if (pendingCount > 0) {
-        badge.textContent = pendingCount;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
+      if (badge) {
+        if (pendingCount > 0) {
+          badge.textContent = pendingCount;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
       }
     }
 
-    // RENDER CHART (7 DAYS COBRANZA REAL)
     function renderChart() {
       const ctx = document.getElementById('salesChart');
       if (!ctx) return;
@@ -726,7 +726,6 @@
         const dateStr = d.toISOString().split('T')[0];
         const dayLabel = `${dayNames[d.getDay()]} ${d.getDate()}`;
         
-        // Dinero ingresado en este día
         const daySales = state.sales
           .filter(s => s.date === dateStr)
           .reduce((sum, s) => sum + Number(s.receivedAmount || 0), 0);
@@ -784,7 +783,6 @@
       });
     }
 
-    // RENDER RECENT SALES MINI LIST
     function renderRecentSales() {
       const container = document.getElementById('recentSalesList');
       if (!container) return;
@@ -818,7 +816,6 @@
       }).join('');
     }
 
-    // POPULATE CLIENT SELECT IN FORM
     function populateClientSelectOptions() {
       const select = document.getElementById('saleClientSelect');
       if (!select) return;
@@ -845,7 +842,6 @@
       }
     }
 
-    // HANDLE SAVE SALE FORM
     async function handleSaveSale(e) {
       e.preventDefault();
 
@@ -889,7 +885,6 @@
 
       await dbSaveSale(newSale);
 
-      // Reset Form
       document.getElementById('saleForm').reset();
       document.getElementById('saleDate').value = getFormattedDate(0);
       calculatePendingFromForm();
@@ -897,7 +892,6 @@
       switchTab('dashboard');
     }
 
-    // RENDER CLIENTS LIST & SELECTION
     function renderClientsList() {
       const container = document.getElementById('clientsList');
       const countLabel = document.getElementById('clientsListCount');
@@ -1036,7 +1030,6 @@
       switchTab('dashboard');
     }
 
-    // MODAL EDIT SALE LOGIC
     function openEditSaleModal(saleId) {
       const sale = state.sales.find(s => s.id === saleId);
       if (!sale) return;
@@ -1083,7 +1076,6 @@
       switchTab('dashboard');
     }
 
-    // MODAL ABONO / ENTREGA DE DEUDA
     function openPaymentModal(saleId) {
       const sale = state.sales.find(s => s.id === saleId);
       if (!sale) return;
@@ -1121,7 +1113,6 @@
       const newPendingAmount = Math.max(0, Number(sale.amount) - newReceivedAmount);
       const newStatus = newPendingAmount === 0 ? 'paid' : 'pending';
 
-      // 1. Guardar registro del abono recibido hoy
       const paymentDoc = {
         id: 'p_' + Date.now(),
         saleId: sale.id,
@@ -1131,19 +1122,16 @@
       };
       await dbSavePayment(paymentDoc);
 
-      // 2. Actualizar venta original
       await dbUpdateSale(sale.id, {
         receivedAmount: newReceivedAmount,
         pendingAmount: newPendingAmount,
         status: newStatus
       });
 
-      // 3. Cerrar modal y volver a la página de inicio (Panel Principal)
       closePaymentModal();
       switchTab('dashboard');
     }
 
-    // MODAL NEW CLIENT LOGIC
     function openNewClientModal() {
       const modal = document.getElementById('newClientModal');
       modal.classList.remove('hidden');
@@ -1176,7 +1164,6 @@
       selectClient(newClient.id);
     }
 
-    // RENDER PENDING SALES VIEW
     function renderPendingSales() {
       const container = document.getElementById('pendingSalesList');
       if (!container) return;
@@ -1229,3 +1216,4 @@
   </script>
 </body>
 </html>
+
