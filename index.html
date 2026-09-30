@@ -522,7 +522,6 @@
     import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
       apiKey: "AIzaSyCS-C92KhqFG_qoTXO8wVnpYR3LAgySxt8",
       authDomain: "jv-web-5f649.firebaseapp.com",
@@ -895,7 +894,6 @@
       document.getElementById('saleDate').value = getFormattedDate(0);
       calculatePendingFromForm();
 
-      alert('¡Venta registrada con éxito!');
       switchTab('dashboard');
     }
 
@@ -1029,11 +1027,13 @@
       state.selectedClientId = null;
       document.getElementById('activeClientContent').classList.add('hidden');
       document.getElementById('noClientSelected').classList.remove('hidden');
+      switchTab('dashboard');
     }
 
     async function deleteSale(saleId) {
       if (!confirm('¿Eliminar esta venta del registro?')) return;
       await dbDeleteSale(saleId);
+      switchTab('dashboard');
     }
 
     // MODAL EDIT SALE LOGIC
@@ -1080,6 +1080,7 @@
       });
 
       closeEditSaleModal();
+      switchTab('dashboard');
     }
 
     // MODAL ABONO / ENTREGA DE DEUDA
@@ -1137,8 +1138,9 @@
         status: newStatus
       });
 
+      // 3. Cerrar modal y volver a la página de inicio (Panel Principal)
       closePaymentModal();
-      alert(`¡Entrega de ${formatMoney(paidNow)} registrada correctamente!`);
+      switchTab('dashboard');
     }
 
     // MODAL NEW CLIENT LOGIC
