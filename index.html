@@ -563,40 +563,48 @@
 
     window.dbSaveClient = async function(client) {
       await setDoc(doc(db, "clients", client.id), client);
+      const index = window.state.clients.findIndex(c => c.id === client.id);
+      if (index >= 0) window.state.clients[index] = client;
+      else window.state.clients.push(client);
+      window.renderAllViews();
     };
 
     window.dbDeleteClient = async function(clientId) {
       await deleteDoc(doc(db, "clients", clientId));
+      window.state.clients = window.state.clients.filter(c => c.id !== clientId);
+      window.renderAllViews();
     };
 
     window.dbSaveSale = async function(sale) {
       await setDoc(doc(db, "sales", sale.id), sale);
+      window.state.sales.push(sale);
+      window.renderAllViews();
     };
 
     window.dbUpdateSale = async function(saleId, updatedData) {
       await updateDoc(doc(db, "sales", saleId), updatedData);
+      const index = window.state.sales.findIndex(s => s.id === saleId);
+      if (index >= 0) {
+        window.state.sales[index] = { ...window.state.sales[index], ...updatedData };
+      }
+      window.renderAllViews();
     };
 
     window.dbDeleteSale = async function(saleId) {
       await deleteDoc(doc(db, "sales", saleId));
+      window.state.sales = window.state.sales.filter(s => s.id !== saleId);
+      window.renderAllViews();
     };
 
     window.dbSavePayment = async function(payment) {
       await setDoc(doc(db, "payments", payment.id), payment);
+      window.state.payments.push(payment);
+      window.renderAllViews();
     };
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('saleDate').value = getFormattedDate(0);
       initRealtimeSync();
-
-      // TECLADO: Cerrar modales con 'Esc'
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closeNewClientModal();
-          closePaymentModal();
-          closeEditSaleModal();
-        }
-      });
     });
   </script>
 
@@ -664,31 +672,24 @@
     function renderSummaryMetrics() {
       const todayStr = getFormattedDate(0);
       
-      const todaySalesReceived = state.sales
+      // Total de ventas registradas hoy (monto total de la venta)
+      const todayTotal = state.sales
         .filter(s => s.date === todayStr)
-        .reduce((sum, s) => sum + Number(s.receivedAmount || 0), 0);
+        .reduce((sum, s) => sum + Number(s.amount || 0), 0);
 
-      const todayPayments = state.payments
-        .filter(p => p.date === todayStr)
-        .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+      // Total acumulado de ventas totales (monto total de todas las ventas)
+      const totalSalesSum = state.sales
+        .reduce((sum, s) => sum + Number(s.amount || 0), 0);
 
-      const todayTotal = todaySalesReceived + todayPayments;
-
+      // Total acumulado de pagos faltantes (saldos pendientes)
       const pendingTotal = state.sales
         .reduce((sum, s) => sum + Number(s.pendingAmount || 0), 0);
 
-      const totalSalesReceivedSum = state.sales
-        .reduce((sum, s) => sum + Number(s.receivedAmount || 0), 0);
-
-      const totalPaymentsSum = state.payments
-        .reduce((sum, p) => sum + Number(p.amount || 0), 0);
-
-      const totalIncomeReal = totalSalesReceivedSum + totalPaymentsSum;
-
+      // Actualizar textos en pantalla
       document.getElementById('headerTodayTotal').textContent = formatMoney(todayTotal);
       document.getElementById('headerPendingTotal').textContent = formatMoney(pendingTotal);
 
-      document.getElementById('dashWeeklyTotal').textContent = formatMoney(totalIncomeReal);
+      document.getElementById('dashWeeklyTotal').textContent = formatMoney(totalSalesSum);
       document.getElementById('dashPendingTotal').textContent = formatMoney(pendingTotal);
       document.getElementById('dashClientsCount').textContent = state.clients.length;
 
@@ -718,16 +719,13 @@
         const dateStr = d.toISOString().split('T')[0];
         const dayLabel = `${dayNames[d.getDay()]} ${d.getDate()}`;
         
-        const daySales = state.sales
+        // Sumar el monto total de las ventas registradas en cada día
+        const daySalesTotal = state.sales
           .filter(s => s.date === dateStr)
-          .reduce((sum, s) => sum + Number(s.receivedAmount || 0), 0);
-
-        const dayPayments = state.payments
-          .filter(p => p.date === dateStr)
-          .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+          .reduce((sum, s) => sum + Number(s.amount || 0), 0);
 
         daysLabels.push(dayLabel);
-        salesData.push(daySales + dayPayments);
+        salesData.push(daySalesTotal);
       }
 
       if (salesChartInstance) {
@@ -739,7 +737,7 @@
         data: {
           labels: daysLabels,
           datasets: [{
-            label: 'Ingreso Efectivo ($)',
+            label: 'Ventas Totales ($)',
             data: salesData,
             backgroundColor: 'rgba(59, 130, 246, 0.6)',
             borderColor: '#3b82f6',
@@ -756,7 +754,7 @@
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return 'Ingresado: ' + formatMoney(context.raw);
+                  return 'Vendido: ' + formatMoney(context.raw);
                 }
               }
             }
@@ -812,14 +810,12 @@
       const select = document.getElementById('saleClientSelect');
       if (!select) return;
 
-      const selectedVal = select.value;
       let html = `<option value="">-- Selecciona Cliente --</option>`;
       state.clients.forEach(c => {
         html += `<option value="${c.id}">${c.name}</option>`;
       });
       html += `<option value="NEW_CLIENT">+ Crear Nuevo Cliente</option>`;
       select.innerHTML = html;
-      select.value = selectedVal;
       handleClientSelectChange(select);
     }
 
@@ -1015,12 +1011,13 @@
       state.selectedClientId = null;
       document.getElementById('activeClientContent').classList.add('hidden');
       document.getElementById('noClientSelected').classList.remove('hidden');
-      renderClientsList();
+      switchTab('dashboard');
     }
 
     async function deleteSale(saleId) {
       if (!confirm('¿Eliminar esta venta del registro?')) return;
       await dbDeleteSale(saleId);
+      switchTab('dashboard');
     }
 
     function openEditSaleModal(saleId) {
@@ -1066,6 +1063,7 @@
       });
 
       closeEditSaleModal();
+      switchTab('dashboard');
     }
 
     function openPaymentModal(saleId) {
@@ -1121,6 +1119,7 @@
       });
 
       closePaymentModal();
+      switchTab('dashboard');
     }
 
     function openNewClientModal() {
